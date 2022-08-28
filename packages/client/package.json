@@ -1,6 +1,6 @@
 {
-  "name": "nft.storage",
-  "version": "7.0.0",
+  "name": "nft.storage-v",
+  "version": "7.0.0-1",
   "description": "A client library for the https://nft.storage/ service. It provides a convenient interface for working with the HTTP API from a web browser or Node.js",
   "license": "(Apache-2.0 OR MIT)",
   "type": "module",
@@ -58,7 +58,7 @@
     "@web-std/file": "^3.0.0",
     "@web-std/form-data": "^3.0.0",
     "carbites": "^1.0.6",
-    "ipfs-car": "^0.6.2",
+    "ipfs-car-v": "^0.8.1-1",
     "it-pipe": "^1.1.0",
     "multiformats": "^9.6.4",
     "p-retry": "^4.6.1",

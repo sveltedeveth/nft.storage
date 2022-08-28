@@ -9,7 +9,7 @@ export class BlockstoreCarReader {
   /**
    * @param {number} version
    * @param {CID[]} roots
-   * @param {import('ipfs-car/blockstore').Blockstore} blockstore
+   * @param {import('ipfs-car-v/blockstore').Blockstore} blockstore
    */
   constructor(version, roots, blockstore) {
     /**

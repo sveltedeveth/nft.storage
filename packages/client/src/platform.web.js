@@ -1,4 +1,4 @@
-import { MemoryBlockStore } from 'ipfs-car/blockstore/memory'
+import { MemoryBlockStore } from 'ipfs-car-v/blockstore/memory'
 
 export const fetch = globalThis.fetch
 export const FormData = globalThis.FormData

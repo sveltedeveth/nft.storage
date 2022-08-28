@@ -17,7 +17,7 @@
 import { transform } from 'streaming-iterables'
 import pRetry, { AbortError } from 'p-retry'
 import { TreewalkCarSplitter } from 'carbites/treewalk'
-import { pack } from 'ipfs-car/pack'
+import { pack } from 'ipfs-car-v/pack'
 import { CID } from 'multiformats/cid'
 import throttledQueue from 'throttled-queue'
 import * as Token from './token.js'
@@ -40,7 +40,7 @@ const RATE_LIMIT_PERIOD = 10 * 1000
  * @typedef {import('./lib/interface.js').FilesSource} FilesSource
  * @typedef {import('./lib/interface.js').Pin} Pin
  * @typedef {import('./lib/interface.js').CarReader} CarReader
- * @typedef {import('ipfs-car/blockstore').Blockstore} BlockstoreI
+ * @typedef {import('ipfs-car-v/blockstore').Blockstore} BlockstoreI
  * @typedef {import('./lib/interface.js').RateLimiter} RateLimiter
  * @typedef {import('./lib/interface.js').RequestOptions} RequestOptions
  */
@@ -148,7 +148,10 @@ class NFTStorage {
     let cidString
 
     try {
-      const { cid, car } = await NFTStorage.encodeBlob(blob, { blockstore })
+      const { cid, car } = await NFTStorage.encodeBlob(blob, {
+        blockstore,
+        cidVersion: options?.cidVersion,
+      })
       await NFTStorage.storeCar(service, car, options)
       cidString = cid.toString()
     } finally {
@@ -251,6 +254,7 @@ class NFTStorage {
     try {
       const { cid, car } = await NFTStorage.encodeDirectory(filesSource, {
         blockstore,
+        cidVersion: options?.cidVersion,
       })
       await NFTStorage.storeCar(service, car, options)
       cidString = cid.toString()
@@ -463,15 +467,17 @@ class NFTStorage {
    * @param {Blob} blob
    * @param {object} [options]
    * @param {BlockstoreI} [options.blockstore]
+   * @param {0 | 1} [options.cidVersion]
    * @returns {Promise<{ cid: CID, car: CarReader }>}
    */
-  static async encodeBlob(blob, { blockstore } = {}) {
+  static async encodeBlob(blob, { blockstore, cidVersion } = {}) {
     if (blob.size === 0) {
       throw new Error('Content size is 0, make sure to provide some content')
     }
     return packCar([toImportCandidate('blob', blob)], {
       blockstore,
       wrapWithDirectory: false,
+      cidVersion,
     })
   }
 
@@ -498,9 +504,10 @@ class NFTStorage {
    * @param {FilesSource} files
    * @param {object} [options]
    * @param {BlockstoreI} [options.blockstore]
+   * @param {0 | 1} [options.cidVersion]
    * @returns {Promise<{ cid: CID, car: CarReader }>}
    */
-  static async encodeDirectory(files, { blockstore } = {}) {
+  static async encodeDirectory(files, { blockstore, cidVersion } = {}) {
     let size = 0
     const input = pipe(files, async function* (files) {
       for await (const file of files) {
@@ -511,6 +518,7 @@ class NFTStorage {
     const packed = await packCar(input, {
       blockstore,
       wrapWithDirectory: true,
+      cidVersion,
     })
     if (size === 0) {
       throw new Error(
@@ -556,7 +564,7 @@ class NFTStorage {
    *
    * @example
    * ```js
-   * import { pack } from 'ipfs-car/pack'
+   * import { pack } from 'ipfs-car-v/pack'
    * import { CarReader } from '@ipld/car'
    * const { out, root } = await pack({
    *  input: fs.createReadStream('pinpie.pdf')
@@ -569,7 +577,7 @@ class NFTStorage {
    *
    * @example
    * ```
-   * import { packToBlob } from 'ipfs-car/pack/blob'
+   * import { packToBlob } from 'ipfs-car-v/pack/blob'
    * const data = 'Hello world'
    * const { root, car } = await packToBlob({ input: [new TextEncoder().encode(data)] })
    * const expectedCid = root.toString()
@@ -746,15 +754,29 @@ For more context please see ERC-721 specification https://eips.ethereum.org/EIPS
 }
 
 /**
- * @param {import('ipfs-car/pack').ImportCandidateStream|Array<{ path: string, content: import('./platform.js').ReadableStream }>} input
+ * @param {import('ipfs-car-v/pack').ImportCandidateStream|Array<{ path: string, content: import('./platform.js').ReadableStream }>} input
  * @param {object} [options]
  * @param {BlockstoreI} [options.blockstore]
  * @param {boolean} [options.wrapWithDirectory]
+ * @param {0 | 1 | undefined} [options.cidVersion]
  */
-const packCar = async (input, { blockstore, wrapWithDirectory } = {}) => {
+const packCar = async (
+  input,
+  { blockstore, wrapWithDirectory, cidVersion } = {}
+) => {
   /* c8 ignore next 1 */
   blockstore = blockstore || new Blockstore()
-  const { root: cid } = await pack({ input, blockstore, wrapWithDirectory })
+  const { root: cid } = await pack({
+    input,
+    blockstore,
+    wrapWithDirectory,
+    ...(0 === cidVersion
+      ? {
+          cidVersion: cidVersion,
+          ...(!wrapWithDirectory ? { rawLeaves: false } : {}),
+        }
+      : {}),
+  })
   const car = new BlockstoreCarReader(1, [cid], blockstore)
   return { cid, car }
 }

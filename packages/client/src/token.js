@@ -1,4 +1,4 @@
-import { pack } from 'ipfs-car/pack'
+import { pack } from 'ipfs-car-v/pack'
 import { CID } from 'multiformats/cid'
 import * as Block from 'multiformats/block'
 import { sha256 } from 'multiformats/hashes/sha2'
@@ -10,7 +10,7 @@ import { BlockstoreCarReader } from './bs-car-reader.js'
 /**
  * @typedef {import('./gateway.js').GatewayURLOptions} EmbedOptions
  * @typedef {import('./lib/interface.js').TokenInput} TokenInput
- * @typedef {import('ipfs-car/blockstore').Blockstore} Blockstore
+ * @typedef {import('ipfs-car-v/blockstore').Blockstore} Blockstore
  */
 
 /**

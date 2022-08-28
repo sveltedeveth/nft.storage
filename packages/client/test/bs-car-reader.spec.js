@@ -1,5 +1,5 @@
 import * as assert from 'uvu/assert'
-import { MemoryBlockStore } from 'ipfs-car/blockstore/memory'
+import { MemoryBlockStore } from 'ipfs-car-v/blockstore/memory'
 import { CID } from 'multiformats'
 import { BlockstoreCarReader } from '../src/bs-car-reader.js'
 import { randomBlock } from './helpers.js'

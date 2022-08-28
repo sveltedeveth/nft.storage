@@ -1,4 +1,4 @@
-import { MemoryBlockStore } from 'ipfs-car/blockstore/memory'
+import { MemoryBlockStore } from 'ipfs-car-v/blockstore/memory'
 
 declare var fetchExport: typeof fetch
 declare var FormDataExport: typeof FormData

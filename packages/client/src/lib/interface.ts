@@ -136,7 +136,8 @@ export interface RequestOptions {
   /**
    * A signal that can be used to abort the request.
    */
-  signal?: AbortSignal
+  signal?: AbortSignal;
+  cidVersion?: 0 | 1;
 }
 
 export interface CarStorerOptions extends RequestOptions {
